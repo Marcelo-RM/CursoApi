@@ -9,14 +9,22 @@ using System.Threading.Tasks;
 
 namespace curso.api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/usuario")]
     [ApiController]
     public class UsuarioController : ControllerBase
     {
         [HttpPost]
+        [Route("login")]
         public IActionResult Logar(LoginInput login)
         {
-            return Created("", login);
+            return Ok(login);
+        }
+
+        [HttpPost]
+        [Route("register")]
+        public IActionResult Registrar(RegisterInput register)
+        {
+            return Created("", register);
         }
     }
 }
