@@ -1,4 +1,5 @@
-﻿using curso.api.Model.Inputs;
+﻿using curso.api.Filters;
+using curso.api.Model.Inputs;
 using curso.api.Model.Outputs;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -22,18 +23,15 @@ namespace curso.api.Controllers
         [SwaggerResponse(statusCode: 500, description: "Internal Error", type: typeof(ErrorOutput))]
         [HttpPost]
         [Route("login")]
+        [FilterModelState]
         public IActionResult Logar(LoginInput login)
         {
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(new ErrorListOutput(ModelState.SelectMany(sm => sm.Value.Errors).Select(s => s.ErrorMessage)));
-            }
-
             return Ok(login);
         }
 
         [HttpPost]
         [Route("register")]
+        [FilterModelState]
         public IActionResult Registrar(RegisterInput register)
         {
             return Created("", register);
