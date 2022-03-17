@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace curso.api.Model
+namespace curso.api.Model.Inputs
 {
     public class RegisterInput
     {

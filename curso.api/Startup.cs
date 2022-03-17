@@ -55,6 +55,13 @@ namespace curso.api
             {
                 endpoints.MapControllers();
             });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Api curso");
+                c.RoutePrefix = string.Empty; //swagger
+            });
         }
     }
 }
