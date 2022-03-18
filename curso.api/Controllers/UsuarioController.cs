@@ -29,7 +29,7 @@ namespace curso.api.Controllers
         [HttpPost]
         [Route("login")]
         [FilterModelState]
-        public IActionResult Logar(LoginInput login)
+        public IActionResult Login(LoginInput login)
         {
 
             UsuarioOutput usuarioOutput = new UsuarioOutput()
@@ -66,7 +66,7 @@ namespace curso.api.Controllers
         [HttpPost]
         [Route("register")]
         [FilterModelState]
-        public IActionResult Registrar(RegisterInput register)
+        public IActionResult Register(RegisterInput register)
         {
             return Created("", register);
         }
