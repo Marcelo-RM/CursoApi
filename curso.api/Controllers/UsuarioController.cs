@@ -2,8 +2,13 @@
 using curso.api.Model.Inputs;
 using curso.api.Model.Outputs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,7 +31,36 @@ namespace curso.api.Controllers
         [FilterModelState]
         public IActionResult Logar(LoginInput login)
         {
-            return Ok(login);
+
+            UsuarioOutput usuarioOutput = new UsuarioOutput()
+            {
+                Code = "1",
+                Login = "Marcelo",
+                Email = "marcelordrgs98@gmail.com"
+            };
+
+            var secret = Encoding.ASCII.GetBytes("KW7GFQEaauf3peSW");
+            var symmetricSecurityKey = new SymmetricSecurityKey(secret);
+            var securityTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, usuarioOutput.Code.ToString()),
+                    new Claim(ClaimTypes.Name, usuarioOutput.Login.ToString()),
+                    new Claim(ClaimTypes.Email, usuarioOutput.Email.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature)
+            };
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var tokenGenerated = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
+            var token = jwtSecurityTokenHandler.WriteToken(tokenGenerated);
+
+            return Ok(new
+            {
+                Token = token,
+                Usuário = usuarioOutput
+            });
         }
 
         [HttpPost]
