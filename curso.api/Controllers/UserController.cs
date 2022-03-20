@@ -40,7 +40,7 @@ namespace curso.api.Controllers
         /// </summary>
         /// <param name="login">login object</param>
         /// <returns>Retorna status ok, dados do usuário e o token em caso de sucesso</returns>
-        [SwaggerResponse(statusCode: 200, description: "Authentication success", type: typeof(LoginInput))]
+        [SwaggerResponse(statusCode: 200, description: "Authentication success", type: typeof(UserOutput))]
         [SwaggerResponse(statusCode: 400, description: "Mandatory fields", type: typeof(ErrorListOutput))]
         [SwaggerResponse(statusCode: 500, description: "Internal Error", type: typeof(ErrorOutput))]
         [HttpPost]
@@ -50,15 +50,10 @@ namespace curso.api.Controllers
         {
             User user = _userRepository.GetUser(login.Login);
 
-            if(user == null)
+            if(user == null || user.Pass != login.Pass)
             {
-                return BadRequest("Falha no login");
+                return Unauthorized("Verifique usuário e senha");
             }
-
-            //if(user.Pass != login.Pass.GeneratePassCripto())
-            //{
-            //    return BadRequest("Verifique usuário e senha");
-            //}
 
             string token = _authentication.GetToken(user);
 
@@ -79,7 +74,7 @@ namespace curso.api.Controllers
         /// </summary>
         /// <param name="register">register object</param>
         /// <returns>Retorna status created e</returns>
-        [SwaggerResponse(statusCode: 201, description: "Register success", type: typeof(User))]
+        [SwaggerResponse(statusCode: 201, description: "Register success", type: typeof(UserOutput))]
         [SwaggerResponse(statusCode: 400, description: "Mandatory fields", type: typeof(ErrorListOutput))]
         [SwaggerResponse(statusCode: 500, description: "Internal Error", type: typeof(ErrorOutput))]
         [HttpPost]
@@ -104,7 +99,14 @@ namespace curso.api.Controllers
             _userRepository.Register(user);
             _userRepository.Commit();
 
-            return Created("", user);
+            UserOutput userOutput = new UserOutput()
+            {
+                Code = user.Code,
+                Email = user.Email,
+                Login = user.Login
+            };
+
+            return Created("", userOutput);
         }
     }
 }

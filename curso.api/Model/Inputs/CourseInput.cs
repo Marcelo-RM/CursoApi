@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace curso.api.Model.Inputs
 {
-    public class CursoInput
+    public class CourseInput
     {
         public string Name { get; set; }
         public string Description { get; set; }

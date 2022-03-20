@@ -4,7 +4,7 @@
         <name>curso.api</name>
     </assembly>
     <members>
-        <member name="M:curso.api.Controllers.CourseController.Create(curso.api.Model.Inputs.CursoInput)">
+        <member name="M:curso.api.Controllers.CourseController.Create(curso.api.Model.Inputs.CourseInput)">
             <summary>
             Este serviço permite cadastrar curso para o usuário autenticado
             </summary>

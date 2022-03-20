@@ -1,9 +1,12 @@
-﻿using curso.api.Model.Inputs;
+﻿using curso.api.Business.Entities;
+using curso.api.Business.Repositories;
+using curso.api.Model.Inputs;
 using curso.api.Model.Outputs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -14,6 +17,13 @@ namespace curso.api.Controllers
     [Authorize]
     public class CourseController : ControllerBase
     {
+
+        private readonly ICourseRepository _courseRepository;
+
+        public CourseController(ICourseRepository courseRepository)
+        {
+            _courseRepository = courseRepository;
+        }
         /// <summary>
         /// Este serviço permite cadastrar curso para o usuário autenticado
         /// </summary>
@@ -23,10 +33,28 @@ namespace curso.api.Controllers
         [SwaggerResponse(statusCode: 401, description: "Não autorizado")]
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> Create(CursoInput cursoInput)
+        public async Task<IActionResult> Create(CourseInput courseInput)
         {
-            int codigoUsuario = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            return Created("", cursoInput);
+            int userCode = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            Course course = new Course()
+            {
+                Name = courseInput.Name,
+                Description = courseInput.Description,
+                UserCode = userCode
+            };
+
+            _courseRepository.Create(course);
+            _courseRepository.Commit();
+
+            string userLogin = User.FindFirst(c => c.Type == ClaimTypes.Name)?.Value.ToString();
+            CourseOutput courseOutput = new CourseOutput()
+            {
+                Login = userLogin,
+                Name = course.Description,
+                Description = course.Description,
+            };
+
+            return Created("", courseOutput);
         }
 
         /// <summary>
@@ -40,17 +68,16 @@ namespace curso.api.Controllers
         [Route("")]
         public async Task<IActionResult> Get()
         {
-            List<CursoOutput> cursos = new List<CursoOutput>();
-
-            int codigoUsuario = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            cursos.Add(new CursoOutput()
-            {
-                Login = codigoUsuario.ToString(),
-                Description = "TestCourseDesc",
-                Name = "TestCourseName"
-            });
-            
-            return Ok(cursos);
+            int userCode = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            IEnumerable<CourseOutput> courses = _courseRepository.GetList(userCode)
+                .Select(s => new CourseOutput()
+                {
+                    Name = s.Name,
+                    Description = s.Description,
+                    Login = s.User.Login
+                });
+                        
+            return Ok(courses);
         }
 
     }

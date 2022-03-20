@@ -1,6 +1,6 @@
 ﻿namespace curso.api.Model.Outputs
 {
-    public class CursoOutput
+    public class CourseOutput
     {
         public string Name { get; set; }
         public string Description { get; set; }
