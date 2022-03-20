@@ -1,10 +1,14 @@
-﻿using curso.api.Filters;
+﻿using curso.api.Business.Entities;
+using curso.api.Filters;
+using curso.api.Infraestruture.Data;
 using curso.api.Model.Inputs;
 using curso.api.Model.Outputs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -63,12 +67,40 @@ namespace curso.api.Controllers
             });
         }
 
+        /// <summary>
+        /// Este serviço permite registrar um usuário
+        /// </summary>
+        /// <param name="register">register object</param>
+        /// <returns>Retorna status created e</returns>
+        [SwaggerResponse(statusCode: 201, description: "Register success", type: typeof(User))]
+        [SwaggerResponse(statusCode: 400, description: "Mandatory fields", type: typeof(ErrorListOutput))]
+        [SwaggerResponse(statusCode: 500, description: "Internal Error", type: typeof(ErrorOutput))]
         [HttpPost]
         [Route("register")]
         [FilterModelState]
         public IActionResult Register(RegisterInput register)
         {
-            return Created("", register);
+            DbContextOptionsBuilder<CourseDbContext> options = new DbContextOptionsBuilder<CourseDbContext>();
+            options.UseSqlServer("Server=localhost;Database=Course;user=USR#COURSE;password=course@2022;");
+            CourseDbContext context = new CourseDbContext(options.Options);
+
+            IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
+            if (pendingMigrations.Count() > 0)
+            {
+                context.Database.Migrate();
+            }
+
+            User user = new User()
+            {
+                Login = register.Login,
+                Email = register.Email,
+                Pass = register.Pass
+            };
+
+            context.User.Add(user);
+            context.SaveChanges();
+
+            return Created("", user);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace curso.api.Infraestruture.Data.Mappings
             builder.Property(p => p.Code).ValueGeneratedOnAdd();
             builder.Property(p => p.Name);
             builder.Property(p => p.Description);
-            builder.Property(p => p.UserCode);
-            builder.Property(p => p.User);
+            builder.HasOne(p => p.User)
+                .WithMany().HasForeignKey(fk => fk.UserCode);
         }
     }
 }
