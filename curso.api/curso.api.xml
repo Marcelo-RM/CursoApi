@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>curso.api</name>
+    </assembly>
+    <members>
+        <member name="M:curso.api.Controllers.CourseController.Create(curso.api.Model.Inputs.CourseInput)">
+            <summary>
+            Este serviço permite cadastrar curso para o usuário autenticado
+            </summary>
+            <param name="cursoInput"></param>
+            <returns>Retorna status 201 e dados do curso do usuário</returns>
+        </member>
+        <member name="M:curso.api.Controllers.CourseController.Get">
+            <summary>
+            Este serviço permite obter todos os cursos ativos do usuário
+            </summary>
+            <param name=""></param>
+            <returns>Retorna status ok e dados do curso do usuário</returns>
+        </member>
+        <member name="M:curso.api.Controllers.UserController.Login(curso.api.Model.Inputs.LoginInput)">
+            <summary>
+            Este serviço permite autenticar um usuário cadastrado e ativo
+            </summary>
+            <param name="login">login object</param>
+            <returns>Retorna status ok, dados do usuário e o token em caso de sucesso</returns>
+        </member>
+        <member name="M:curso.api.Controllers.UserController.Register(curso.api.Model.Inputs.RegisterInput)">
+            <summary>
+            Este serviço permite registrar um usuário
+            </summary>
+            <param name="register">register object</param>
+            <returns>Retorna status created e</returns>
+        </member>
+    </members>
+</doc>
