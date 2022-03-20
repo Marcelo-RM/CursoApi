@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace curso.api.Model.Outputs
 {
-    public class UsuarioOutput
+    public class UserOutput
     {
-        public string Code { get; set; }
+        public int Code { get; set; }
         public string Login { get; set; }
         public string Email { get; set; }
     }

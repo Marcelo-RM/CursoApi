@@ -1,10 +1,14 @@
 ﻿using curso.api.Business.Entities;
+using curso.api.Business.Repositories;
+using curso.api.Configurations;
 using curso.api.Filters;
 using curso.api.Infraestruture.Data;
+using curso.api.Infraestruture.Data.Repositories;
 using curso.api.Model.Inputs;
 using curso.api.Model.Outputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
@@ -20,8 +24,17 @@ namespace curso.api.Controllers
 {
     [Route("api/v1/usuario")]
     [ApiController]
-    public class UsuarioController : ControllerBase
+    public class UserController : ControllerBase
     {
+        private readonly IUserRepository _userRepository;
+        private readonly IAuthenticationService _authentication;
+
+        public UserController(IUserRepository userRepository, IAuthenticationService authentication)
+        {
+            _userRepository = userRepository;
+            _authentication = authentication;
+        }
+
         /// <summary>
         /// Este serviço permite autenticar um usuário cadastrado e ativo
         /// </summary>
@@ -35,35 +48,29 @@ namespace curso.api.Controllers
         [FilterModelState]
         public IActionResult Login(LoginInput login)
         {
+            User user = _userRepository.GetUser(login.Login);
 
-            UsuarioOutput usuarioOutput = new UsuarioOutput()
+            if(user == null)
             {
-                Code = "1",
-                Login = "Marcelo",
-                Email = "marcelordrgs98@gmail.com"
-            };
+                return BadRequest("Falha no login");
+            }
 
-            var secret = Encoding.ASCII.GetBytes("KW7GFQEaauf3peSW");
-            var symmetricSecurityKey = new SymmetricSecurityKey(secret);
-            var securityTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, usuarioOutput.Code.ToString()),
-                    new Claim(ClaimTypes.Name, usuarioOutput.Login.ToString()),
-                    new Claim(ClaimTypes.Email, usuarioOutput.Email.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(1),
-                SigningCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature)
-            };
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            var tokenGenerated = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
-            var token = jwtSecurityTokenHandler.WriteToken(tokenGenerated);
+            //if(user.Pass != login.Pass.GeneratePassCripto())
+            //{
+            //    return BadRequest("Verifique usuário e senha");
+            //}
+
+            string token = _authentication.GetToken(user);
 
             return Ok(new
             {
                 Token = token,
-                Usuário = usuarioOutput
+                Usuário = new UserOutput()
+                { 
+                    Code = user.Code,
+                    Login = user.Login,
+                    Email = user.Email
+                }
             });
         }
 
@@ -80,15 +87,12 @@ namespace curso.api.Controllers
         [FilterModelState]
         public IActionResult Register(RegisterInput register)
         {
-            DbContextOptionsBuilder<CourseDbContext> options = new DbContextOptionsBuilder<CourseDbContext>();
-            options.UseSqlServer("Server=localhost;Database=Course;user=USR#COURSE;password=course@2022;");
-            CourseDbContext context = new CourseDbContext(options.Options);
-
-            IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
-            if (pendingMigrations.Count() > 0)
-            {
-                context.Database.Migrate();
-            }
+            
+            //IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
+            //if (pendingMigrations.Count() > 0)
+            //{
+            //    context.Database.Migrate();
+            //}
 
             User user = new User()
             {
@@ -97,8 +101,8 @@ namespace curso.api.Controllers
                 Pass = register.Pass
             };
 
-            context.User.Add(user);
-            context.SaveChanges();
+            _userRepository.Register(user);
+            _userRepository.Commit();
 
             return Created("", user);
         }

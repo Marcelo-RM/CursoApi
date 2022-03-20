@@ -12,7 +12,7 @@ namespace curso.api.Controllers
     [Route("api/v1/curso")]
     [ApiController]
     [Authorize]
-    public class CursoController : ControllerBase
+    public class CourseController : ControllerBase
     {
         /// <summary>
         /// Este serviço permite cadastrar curso para o usuário autenticado
